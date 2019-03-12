@@ -1,0 +1,72 @@
+{
+    "Report": {
+        "Name": "Cisco UCS Manager As Built Documentation",
+        "Version": "1.0",
+        "Status": "Released"
+    },
+    "Options": {
+        "ShowFaultSummary": true
+    },
+    "Section": {
+        "System": true,
+        "Equipment": true,
+        "Servers": true,
+        "LAN": true,
+        "SAN": true,
+        "VM": true,
+        "Storage": true,
+        "Chassis": true,
+        "Admin": true
+    },
+    "InfoLevel": {
+        "_comment_": "0 = Disabled, 1 = Summary, 2 = Detailed, 3 = Adv Detailed",
+        "Equipment": {
+            "FabricInterconnects": 3,
+            "Chassis": 3,
+            "RackMounts": 3,
+            "ServerInventory": 3,
+            "Policies": 3
+        },
+        "Servers": {},
+        "LAN": {},
+        "SAN": {},
+        "VM": {},
+        "Storage": {},
+        "Chassis": {},
+        "Admin": {}
+    },
+    "HealthCheck": {
+        "Cluster": {
+            "HAReady": true
+        },
+        "FI": {
+            "State": true,
+            "Operabability": true,
+            "Thermal": true,
+            "Ports": {
+                "AdminState": true,
+                "Status": true
+            },
+            "Fan": {
+                "Operabability": true,
+                "Power": true,
+                "Thermal": true
+            },
+            "PSU": {
+                "Operabability": true,
+                "Power": true,
+                "Voltage": true,
+                "Performance": true,
+                "Thermal": true
+            }
+        },
+        "Chassis": {
+            "AdminState": true,
+            "Status": true,
+            "Power": true,
+            "Thermal": true,
+            "LicenseState": true,
+            "SlotsAvailable": true
+        }
+    }
+}
