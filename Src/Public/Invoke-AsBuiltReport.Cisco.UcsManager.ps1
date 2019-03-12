@@ -5,7 +5,7 @@ function Invoke-AsBuiltReport.Cisco.UcsManager {
     .DESCRIPTION
         Documents the configuration of Cisco UCS infrastucture in Word/HTML/XML/Text formats using PScribo.
     .NOTES
-        Version:        2.0
+        Version:        0.2.0
         Author:         Tim Carman
         Twitter:        @tpcarman
         Github:         tpcarman
@@ -13,16 +13,22 @@ function Invoke-AsBuiltReport.Cisco.UcsManager {
                         Martijn Smit (@smitmartijn) - Cisco UCS Inventory Script
                         Iain Brighton (@iainbrighton) - PScribo module
     .LINK
-        https://github.com/tpcarman/As-Built-Report
-        https://github.com/smitmartijn/Cisco-UCS-Inventory-Script
-        https://github.com/iainbrighton/PScribo
+        https://github.com/AsBuiltReport/AsBuiltReport.Cisco.UcsManager
     #>
 
+    param (
+        [String[]] $Target,
+        [PSCredential] $Credential,
+        [String]$StylePath
+    )
+
+    $InfoLevel = $Global:ReportConfig.InfoLevel
+    
     #region Configuration Settings
-        # If custom style not set, use default style
-        if (!$StylePath) {
-            & "$PSScriptRoot\..\..\AsBuiltReport.Cisco.UcsManager.Style.ps1"
-        }
+    # If custom style not set, use default style
+    if (!$StylePath) {
+        & "$PSScriptRoot\..\..\AsBuiltReport.Cisco.UcsManager.Style.ps1"
+    }
 
     foreach ($UCS in $Target) {
         # Connect to Cisco UCS domain using supplied credentials
@@ -497,7 +503,7 @@ function Invoke-AsBuiltReport.Cisco.UcsManager {
                                                             'CPUs' = $Blade.NumOfCpus
                                                             'Cores' = $Blade.NumOfCores
                                                             'Threads' = $Blade.NumOfThreads 
-                                                            'Memory GB' = $Blade.AvailableMemory/1024
+                                                            'Memory GB' = $Blade.AvailableMemory / 1024
                                                             'Adapters' = $Blade.NumOfAdaptors 
                                                             'NICs' = $Blade.NumOfEthHostIfs
                                                             'HBAs' = $Blade.NumOfFcHostIfs
@@ -555,7 +561,7 @@ function Invoke-AsBuiltReport.Cisco.UcsManager {
                                             'CPUs' = $Blade.NumOfCpus
                                             'Cores' = $Blade.NumOfCores
                                             'Threads' = $Blade.NumOfThreads 
-                                            'Memory GB' = $Blade.AvailableMemory/1024
+                                            'Memory GB' = $Blade.AvailableMemory / 1024
                                             'Adapters' = $Blade.NumOfAdaptors 
                                             'NICs' = $Blade.NumOfEthHostIfs
                                             'HBAs' = $Blade.NumOfFcHostIfs
@@ -581,7 +587,7 @@ function Invoke-AsBuiltReport.Cisco.UcsManager {
                                             'CPUs' = $RackUnit.NumOfCpus
                                             'Cores' = $RackUnit.NumOfCores
                                             'Threads' = $RackUnit.NumOfThreads
-                                            'Memory GB' = $RackUnit.AvailableMemory/1024 
+                                            'Memory GB' = $RackUnit.AvailableMemory / 1024 
                                             'Adapters' = $RackUnit.NumOfAdaptors 
                                             'NICs' = $RackUnit.NumOfEthHostIfs
                                             'HBAs' = $RackUnit.NumOfFcHostIfs
@@ -1015,7 +1021,7 @@ function Invoke-AsBuiltReport.Cisco.UcsManager {
                     }
                     #endregion Server Policies Section
 
-    <#                        Section -Style Heading4 -Name 'BIOS Policy Settings' {
+                    <#                        Section -Style Heading4 -Name 'BIOS Policy Settings' {
                                 Get-UcsBiosPolicy | Get-UcsBiosVfQuietBoot | Sort-Object Dn | Select-Object @{L = 'Distinguished Name'; E = {$_.Dn}}, Vp* | Table -Name 'BIOS Policy VfQuietBoot'
                                 BlankLine
                                 Get-UcsBiosPolicy | Get-UcsBiosVfPOSTErrorPause | Sort-Object Dn | Select-Object @{L = 'Distinguished Name'; E = {$_.Dn}}, Vp* | Table -Name 'BIOS Policy VfPOSTErrorPause'
@@ -1156,8 +1162,8 @@ function Invoke-AsBuiltReport.Cisco.UcsManager {
 
                         #region Server Pool Assignments
                         Section -Style Heading3 -Name 'Server Pool Assignments' {
-                        #    $UcsComputePooledSlot = Get-UcsComputePooledSlot | Select-Object @{L = 'Distinguished Name'; E = {$_.Dn}}, Rn
-                        #    $UcsComputePooledSlot | Table -Name 'Server Pool Assignments' 
+                            #    $UcsComputePooledSlot = Get-UcsComputePooledSlot | Select-Object @{L = 'Distinguished Name'; E = {$_.Dn}}, Rn
+                            #    $UcsComputePooledSlot | Table -Name 'Server Pool Assignments' 
                         }
                         #endregion Server Pool Assignments
                     }
@@ -1174,11 +1180,11 @@ function Invoke-AsBuiltReport.Cisco.UcsManager {
 
                         $UcsLanCloud = Get-UcsLanCloud -Ucs $UCSM
                         if ($UcsLanCloud) {
-                        $LanCloud = [PSCustomObject]@{
-                            'UCS' = $UcsLanCloud.Ucs
-                            'Mode' = $UcsLanCloud.Mode
-                        } 
-                        $LanCloud | Table -Name 'LAN Cloud' -ColumnWidths 50, 50
+                            $LanCloud = [PSCustomObject]@{
+                                'UCS' = $UcsLanCloud.Ucs
+                                'Mode' = $UcsLanCloud.Mode
+                            } 
+                            $LanCloud | Table -Name 'LAN Cloud' -ColumnWidths 50, 50
                         }
 
                         #region Port Channels and Uplinks Section
@@ -1201,7 +1207,7 @@ function Invoke-AsBuiltReport.Cisco.UcsManager {
                                         'Status' = $PortChannel.OperState
                                     }
                                 }
-                                $UplinkPortChannel  | Sort-Object 'Fabric','ID' | Table -Name 'Port Channels and Uplinks'
+                                $UplinkPortChannel  | Sort-Object 'Fabric', 'ID' | Table -Name 'Port Channels and Uplinks'
                                 Blankline
                                 foreach ($PortChannel in $UcsUplinkPortChannel) {
                                     $UcsUplinkPortChannelMember = Get-UcsUplinkPortChannelMember -Ucs $UCSM -UplinkPortChannel $PortChannel
@@ -1223,7 +1229,7 @@ function Invoke-AsBuiltReport.Cisco.UcsManager {
                                     }
                                     $UplinkPortChannelMembers += $UplinkPortChannelMember
                                 }
-                                $UplinkPortChannelMembers | Sort-Object 'Fabric','Port','Port Channel' | Table -Name 'Port Channel Members'
+                                $UplinkPortChannelMembers | Sort-Object 'Fabric', 'Port', 'Port Channel' | Table -Name 'Port Channel Members'
 
                             }
                         }
@@ -1231,7 +1237,7 @@ function Invoke-AsBuiltReport.Cisco.UcsManager {
 
                         #region VLANs
                         $UcsVlan = Get-UcsVlan | Where-Object {$_.IfRole -eq 'Network'}
-                        if ($UcsVlan){
+                        if ($UcsVlan) {
                             Section -Style Heading4 -Name 'VLANs' {
                                 $Vlans = foreach ($Vlan in $UcsVlan) {
                                     [PSCustomObject]@{
@@ -1250,7 +1256,7 @@ function Invoke-AsBuiltReport.Cisco.UcsManager {
                                         'Multicast Policy Instance' = $Vlan.OperMcastPolicyName
                                     }
                                 }
-                                $Vlans | Sort-Object 'Fabric','VLAN Name' | Table -Name 'VLANs' 
+                                $Vlans | Sort-Object 'Fabric', 'VLAN Name' | Table -Name 'VLANs' 
                             }
                         }
                         #endregion VLANs
@@ -1275,7 +1281,7 @@ function Invoke-AsBuiltReport.Cisco.UcsManager {
                                         'Status' = $ServerLink.OperState
                                     }
                                 }
-                                $ServerLinks | Sort-Object 'Fabric','Port' | Table -Name 'Server Links'
+                                $ServerLinks | Sort-Object 'Fabric', 'Port' | Table -Name 'Server Links'
                             }
                         }
                         #endregion Server Links
@@ -1388,7 +1394,7 @@ function Invoke-AsBuiltReport.Cisco.UcsManager {
                                         'LACP Rate' = $LacpPolicy.FastTimer
                                     }
                                 }
-                                $FabricLacpPolicy | Sort-Object 'Name','Owner' | Table -Name 'LACP Policies' -ColumnWidths 25, 25, 25, 25
+                                $FabricLacpPolicy | Sort-Object 'Name', 'Owner' | Table -Name 'LACP Policies' -ColumnWidths 25, 25, 25, 25
                             }
                         }
                         #endregion LACP Policy Section
@@ -1410,7 +1416,7 @@ function Invoke-AsBuiltReport.Cisco.UcsManager {
                                     'Message Interval' = $UcsFabricUdldPolicy.MsgInterval
                                     'Recovery Action' = $UcsFabricUdldPolicy.RecoveryAction
                                 }
-                                $FabricUdldPolicy | Sort-Object 'Name','Owner' | Table -Name 'Link Protocol Policies' -ColumnWidths 25, 25, 25, 25
+                                $FabricUdldPolicy | Sort-Object 'Name', 'Owner' | Table -Name 'Link Protocol Policies' -ColumnWidths 25, 25, 25, 25
                             }
                         }
                         #endregion Link Protocol Policy Section
@@ -1429,7 +1435,7 @@ function Invoke-AsBuiltReport.Cisco.UcsManager {
                                         'FI-B Querier IPv4 Address' = $MulticastPolicy.QuerierIpAddrPeer
                                     }
                                 }
-                                $FabricMulticastPolicy | Sort-Object 'Name','Owner' | Table -Name 'Multicast Policies'
+                                $FabricMulticastPolicy | Sort-Object 'Name', 'Owner' | Table -Name 'Multicast Policies'
                             }
                         }
                         #endregion Multicast Policy Section
@@ -1449,7 +1455,7 @@ function Invoke-AsBuiltReport.Cisco.UcsManager {
                                         'LLDP Receive' = $NetControlPolicy.LldpReceive
                                     }
                                 }
-                                $NetworkControlPolicy | Sort-Object 'Name','Owner' | Table -Name 'Network Control Policies'
+                                $NetworkControlPolicy | Sort-Object 'Name', 'Owner' | Table -Name 'Network Control Policies'
                             }
                         }
                         #endregion Network Control Policy Section
@@ -1499,7 +1505,7 @@ function Invoke-AsBuiltReport.Cisco.UcsManager {
                                         'Adapter Policy' = $UsnicConPolicy.AdaptorProfileName
                                     }
                                 }
-                                $VnicUsnicConPolicy | Sort-Object 'Name','Owner' | Table -Name 'usNIC Connection Policies'
+                                $VnicUsnicConPolicy | Sort-Object 'Name', 'Owner' | Table -Name 'usNIC Connection Policies'
                             }
                         }
                         #endregion usNIC Connection Policy Section
@@ -1532,7 +1538,7 @@ function Invoke-AsBuiltReport.Cisco.UcsManager {
                                             '' {'not set'}
                                             default {$Vnic.NwCtrlPolicyName}
                                         }
-                                        'Pin Group'= $Vnic.PinToGroupName
+                                        'Pin Group' = $Vnic.PinToGroupName
                                         'Stats Threshold Policy' = $Vnic.StatsPolicyName
                                         'VLANs' = ($Vnic | Get-UcsChild).Name -join ', '
                                     }
@@ -1676,11 +1682,11 @@ function Invoke-AsBuiltReport.Cisco.UcsManager {
 
                         $UcsSanCloud = Get-UcsSanCloud -Ucs $UCSM
                         if ($UcsSanCloud) {
-                        $SanCloud = [PSCustomObject]@{
-                            'UCS' = $UcsSanCloud.Ucs
-                            'Mode' = $UcsSanCloud.Mode
-                        } 
-                        $SanCloud | Table -Name 'SAN Cloud' -ColumnWidths 50, 50
+                            $SanCloud = [PSCustomObject]@{
+                                'UCS' = $UcsSanCloud.Ucs
+                                'Mode' = $UcsSanCloud.Mode
+                            } 
+                            $SanCloud | Table -Name 'SAN Cloud' -ColumnWidths 50, 50
                         }
 
                         #region FC Port Channels
@@ -2166,7 +2172,7 @@ function Invoke-AsBuiltReport.Cisco.UcsManager {
 
                         #region Roles Section
                         $UcsRoles = Get-UcsRole -Ucs $UCSM
-                        if($UcsRoles) {
+                        if ($UcsRoles) {
                             Section -Style Heading4 -Name 'Roles' {
                                 $Roles = foreach ($UcsRole in $UcsRoles) {
                                     [PSCustomObject]@{
@@ -2455,7 +2461,7 @@ function Invoke-AsBuiltReport.Cisco.UcsManager {
                                     'Peer License Count Comparison' = $UcsLicense.PeerStatus
                                 }
                             }
-                            $Licenses | Sort-Object 'License Name','Fabric' | Table -Name 'License Management'
+                            $Licenses | Sort-Object 'License Name', 'Fabric' | Table -Name 'License Management'
                         }
                     }
                     #region License Management Section
