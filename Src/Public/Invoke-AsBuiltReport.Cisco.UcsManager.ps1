@@ -22,7 +22,9 @@ function Invoke-AsBuiltReport.Cisco.UcsManager {
         [String]$StylePath
     )
 
-    $InfoLevel = $Global:ReportConfig.InfoLevel
+    # Import JSON Configuration for Section and InfoLevel
+    $InfoLevel = $ReportConfig.InfoLevel
+    $Section = $ReportConfig.Section
     
     #region Configuration Settings
     # If custom style not set, use default style
@@ -32,7 +34,7 @@ function Invoke-AsBuiltReport.Cisco.UcsManager {
 
     foreach ($UCS in $Target) {
         # Connect to Cisco UCS domain using supplied credentials
-        $UCSM = Connect-Ucs -Name $UCS -Credential $Credentials
+        $UCSM = Connect-Ucs -Name $UCS -Credential $Credential
         #endregion Configuration Settings
 
         #region Script Body
