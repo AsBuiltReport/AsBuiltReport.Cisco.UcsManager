@@ -24,7 +24,7 @@
             "FabricInterconnects": 3,
             "Chassis": 3,
             "RackMounts": 3,
-            "ServerInventory": 3,
+            "ServerInventory": 0,
             "Policies": 3
         },
         "Servers": {},
