@@ -36,7 +36,7 @@ function Invoke-AsBuiltReport.Cisco.UcsManager {
         # Connect to Cisco UCS domain using supplied credentials
         $UCSM = @()       
         try {
-            $UCSM = Connect-Ucs -Name $UCS -Credential $Credential
+            $UCSM = Connect-Ucs -Name $UCS -Credential $Credential -ErrorAction Stop
         } catch {
             Write-Error $_
         }
