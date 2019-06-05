@@ -5,7 +5,7 @@ function Invoke-AsBuiltReport.Cisco.UcsManager {
     .DESCRIPTION
         Documents the configuration of Cisco UCS infrastucture in Word/HTML/XML/Text formats using PScribo.
     .NOTES
-        Version:        0.2.0
+        Version:        0.2.1
         Author:         Tim Carman
         Twitter:        @tpcarman
         Github:         tpcarman
