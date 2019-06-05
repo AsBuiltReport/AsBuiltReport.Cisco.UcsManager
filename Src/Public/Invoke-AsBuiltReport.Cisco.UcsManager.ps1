@@ -5,7 +5,7 @@ function Invoke-AsBuiltReport.Cisco.UcsManager {
     .DESCRIPTION
         Documents the configuration of Cisco UCS infrastucture in Word/HTML/XML/Text formats using PScribo.
     .NOTES
-        Version:        0.2.0
+        Version:        0.2.1
         Author:         Tim Carman
         Twitter:        @tpcarman
         Github:         tpcarman
@@ -73,11 +73,11 @@ function Invoke-AsBuiltReport.Cisco.UcsManager {
                                 'Ethernet State' = $UcsSystem.EthernetState
                                 'Backup Policy' = (Get-UcsMgmtBackupPolicy -Ucs $UCSM).AdminState
                                 'Config Policy' = (Get-UcsMgmtCfgExportPolicy -Ucs $UCSM).AdminState
-                                'Call Home State' = (Get-UcsCallHome -Ucs $UCSM).AdminState
+                                'Call Home State' = (Get-UcsCallhome -Ucs $UCSM).AdminState
                                 'UCSM System Version' = (Get-UcsMgmtController -Ucs $UCSM -Subject system | Get-UcsFirmwareRunning).Version | Select-Object -Last 1
                             }
                             if ($Healthcheck.Cluster.HAReady) {
-                                $ClusterStatus | Where-Object {$_.'HA Ready' -ne 'yes'} | Set-Style -Style Critical -Property 'HA Ready'
+                                $ClusterStatus | Where-Object { $_.'HA Ready' -ne 'yes' } | Set-Style -Style Critical -Property 'HA Ready'
                             }
                             $ClusterStatus | Table -Name 'Cluster Status' -List -ColumnWidths 50, 50 
                             #endregion Cluster Summary Table
@@ -93,7 +93,7 @@ function Invoke-AsBuiltReport.Cisco.UcsManager {
                                 'Fabric Interconnect A State' = $UcsSystem.FiAManagementServicesState
                             }
                             if ($Healthcheck.FI.State) {
-                                $ClusterStatus | Where-Object {$_.'Fabric Interconnect A State' -ne 'up'} | Set-Style -Style Critical -Property 'Fabric Interconnect A State'
+                                $ClusterStatus | Where-Object { $_.'Fabric Interconnect A State' -ne 'up' } | Set-Style -Style Critical -Property 'Fabric Interconnect A State'
                             }
                             $UcsStatusFiA | Table -Name 'Fabric Interconnect A Information' -List -ColumnWidths 50, 50 
                             #endregion Fabric Interconnect A Summary Table
@@ -109,21 +109,21 @@ function Invoke-AsBuiltReport.Cisco.UcsManager {
                                 'Fabric Interconnect B State' = $UcsSystem.FiBManagementServicesState
                             }
                             if ($Healthcheck.FI.State) {
-                                $ClusterStatus | Where-Object {$_.'Fabric Interconnect B State' -ne 'up'} | Set-Style -Style Critical -Property 'Fabric Interconnect B State'
+                                $ClusterStatus | Where-Object { $_.'Fabric Interconnect B State' -ne 'up' } | Set-Style -Style Critical -Property 'Fabric Interconnect B State'
                             }
                             $UcsStatusFiB | Table -Name 'Fabric Interconnect B Information' -List -ColumnWidths 50, 50 
                             #endregion Fabric Interconnect B Summary Table
                         
-                            Blankline
+                            BlankLine
 
                             #region Fault Summary Table
                             $UcsFault = Get-UcsFault -Ucs $UCSM
                             if ($UcsFault -and $Options.ShowFaultSummary) {
                                 $UcsFaults = [PSCustomObject]@{
-                                    'Critical Faults' = ($UcsFault | Where-Object {$_.Severity -eq 'critical'}).Count
-                                    'Major Faults' = ($UcsFault | Where-Object {$_.Severity -eq 'major'}).Count
-                                    'Minor Faults' = ($UcsFault | Where-Object {$_.Severity -eq 'minor'}).Count
-                                    'Warnings' = ($UcsFault | Where-Object {$_.Severity -eq 'warning'}).Count
+                                    'Critical Faults' = ($UcsFault | Where-Object { $_.Severity -eq 'critical' }).Count
+                                    'Major Faults' = ($UcsFault | Where-Object { $_.Severity -eq 'major' }).Count
+                                    'Minor Faults' = ($UcsFault | Where-Object { $_.Severity -eq 'minor' }).Count
+                                    'Warnings' = ($UcsFault | Where-Object { $_.Severity -eq 'warning' }).Count
                                 }
                                 $UcsFaults | Table -Name 'UCS Faults' -ColumnWidths 25, 25, 25, 25
                             }
@@ -141,17 +141,17 @@ function Invoke-AsBuiltReport.Cisco.UcsManager {
                             Section -Style Heading3 -Name 'Fabric Interconnects' {
                                 #region Faric Interconnect Summary Table
                                 $UcsFiSummary = foreach ($Fi in $UcsFi) {
-                                    $FiBoot = Get-UcsMgmtController -Ucs $UCSM -Dn "$($fi.Dn)/mgmt" | Get-ucsfirmwarebootdefinition | Get-UcsFirmwareBootUnit -Filter 'Type -ieq system -or Type -ieq kernel' | Select-Object Type, Version
+                                    $FiBoot = Get-UcsMgmtController -Ucs $UCSM -Dn "$($fi.Dn)/mgmt" | Get-UcsFirmwareBootDefinition | Get-UcsFirmwareBootUnit -Filter 'Type -ieq system -or Type -ieq kernel' | Select-Object Type, Version
                                     [PSCustomObject]@{
                                         'Fabric' = $Fi.Id
                                         'Cluster Role' = Switch ($Fi.Id) {
-                                            'A' {$UcsSystem.FiALeadership}
-                                            'B' {$UcsSystem.FiBLeadership}
+                                            'A' { $UcsSystem.FiALeadership }
+                                            'B' { $UcsSystem.FiBLeadership }
                                         }
                                         'Model' = $Fi.Model
                                         'Serial' = $Fi.Serial
-                                        'System' = ($FiBoot | Where-Object {$_.Type -eq "system"}).Version
-                                        'Kernel' = ($FiBoot | Where-Object {$_.Type -eq "kernel"}).Version
+                                        'System' = ($FiBoot | Where-Object { $_.Type -eq "system" }).Version
+                                        'Kernel' = ($FiBoot | Where-Object { $_.Type -eq "kernel" }).Version
                                         'Ports Used' = ((Get-UcsLicense -Ucs $UCSM -Scope $Fi.Id).UsedQuant | Measure-Object -Sum).Sum
                                         'Ports Licensed' = ((Get-UcsLicense -Ucs $UCSM -Scope $Fi.Id).AbsQuant | Measure-Object -Sum).Sum
                                         'Ethernet Mode' = $UcsLanCloud.Mode
@@ -167,13 +167,13 @@ function Invoke-AsBuiltReport.Cisco.UcsManager {
                                 if ($InfoLevel.Equipment.FabricInterconnects -ge 2) {
                                     foreach ($Fi in $UcsFi) {
                                         Section -Style Heading3 "Fabric Interconnect $($Fi.Id)" {
-                                            $FiBoot = Get-UcsMgmtController -Ucs $UCSM -Dn "$($Fi.Dn)/mgmt" | Get-ucsfirmwarebootdefinition | Get-UcsFirmwareBootUnit -Filter 'Type -ieq system -or Type -ieq kernel' | Select-Object Type, Version
+                                            $FiBoot = Get-UcsMgmtController -Ucs $UCSM -Dn "$($Fi.Dn)/mgmt" | Get-UcsFirmwareBootDefinition | Get-UcsFirmwareBootUnit -Filter 'Type -ieq system -or Type -ieq kernel' | Select-Object Type, Version
                                             #region Fabric Interconnect Detailed Table
                                             $UcsFiDetailed = [PSCustomObject]@{
                                                 'Fabric' = $Fi.Id
                                                 'Cluster Role' = Switch ($Fi.Id) {
-                                                    'A' {$UcsSystem.FiALeadership}
-                                                    'B' {$UcsSystem.FiBLeadership}
+                                                    'A' { $UcsSystem.FiALeadership }
+                                                    'B' { $UcsSystem.FiBLeadership }
                                                 }
                                                 'IP Address' = $Fi.OobIfIp
                                                 'Subnet Mask' = $Fi.OobIfMask
@@ -182,11 +182,11 @@ function Invoke-AsBuiltReport.Cisco.UcsManager {
                                                 'Model' = $Fi.Model
                                                 'Serial' = $Fi.Serial
                                                 'Total Memory (GB)' = [math]::Round(($Fi.TotalMemory / 1024), 3)
-                                                'System' = ($FiBoot | Where-Object {$_.Type -eq "system"}).Version
-                                                'Kernel' = ($FiBoot | Where-Object {$_.Type -eq "kernel"}).Version
+                                                'System' = ($FiBoot | Where-Object { $_.Type -eq "system" }).Version
+                                                'Kernel' = ($FiBoot | Where-Object { $_.Type -eq "kernel" }).Version
                                                 'State' = Switch ($Fi.Id) {
-                                                    'A' {$UcsSystem.FiAManagementServicesState}
-                                                    'B' {$UcsSystem.FiBManagementServicesState}
+                                                    'A' { $UcsSystem.FiAManagementServicesState }
+                                                    'B' { $UcsSystem.FiBManagementServicesState }
                                                 }
                                                 'Ports Used' = ((Get-UcsLicense -Ucs $UCSM -Scope $Fi.Id).UsedQuant | Measure-Object -Sum).Sum
                                                 'Ports Licensed' = ((Get-UcsLicense -Ucs $UCSM -Scope $fi.Id).AbsQuant | Measure-Object -Sum).Sum
@@ -195,12 +195,12 @@ function Invoke-AsBuiltReport.Cisco.UcsManager {
                                                 'Status' = $Fi.Operability
                                                 'Thermal' = $Fi.Thermal
                                                 'Admin Evac Mode' = Switch ($Fi.AdminEvacState) {
-                                                    'fill' {'off'}
-                                                    default {$Fi.AdminEvacState}
+                                                    'fill' { 'off' }
+                                                    default { $Fi.AdminEvacState }
                                                 }
                                                 'Oper Evac Mode' = Switch ($Fi.OperEvacState) {
-                                                    'fill' {'off'}
-                                                    default {$Fi.OperEvacState}
+                                                    'fill' { 'off' }
+                                                    default { $Fi.OperEvacState }
                                                 }
                                             }
                                             $UcsFiDetailed | Sort-Object 'Fabric' | Table -List -Name "Fabric Interconnect $($Fi.Id)"
@@ -222,7 +222,7 @@ function Invoke-AsBuiltReport.Cisco.UcsManager {
                                             #endregion Fabric Interconnect Fixed Module Section
 
                                             #--- Sort Expression to filter port id to be just the numerical port number and sort ascending ---#
-                                            $sortExpr = {if ($_.Dn -match "(?=port[-]).*") {($matches[0] -replace ".*(?<=[-])", '') -as [int]}}
+                                            $sortExpr = { if ($_.Dn -match "(?=port[-]).*") { ($matches[0] -replace ".*(?<=[-])", '') -as [int] } }
                                             #--- Get Fabric Port Configuration and sort by port id using the above sort expression ---#
                                     
                                             #region Fabric Interconnect Ethernet Ports Section
@@ -287,7 +287,7 @@ function Invoke-AsBuiltReport.Cisco.UcsManager {
                                             #endregion Fabric Interconnect Fans Section
 
                                             #region Fabric Interconnect PSUs Section
-                                            $UcsFiPSUs = Get-UcsPSU -NetworkElement $Fi -Ucs $UCSM 
+                                            $UcsFiPSUs = Get-UcsPsu -NetworkElement $Fi -Ucs $UCSM 
                                             if ($UcsFiPSUs) {
                                                 Section -Style Heading4 -Name 'PSUs' {
                                                     $FiPSUs = foreach ($UcsFiPSU in $UcsFiPSUs) {
@@ -419,7 +419,7 @@ function Invoke-AsBuiltReport.Cisco.UcsManager {
 
                                                         if ($InfoLevel.Equipment.Chassis -ge 3) {
                                                             #region Chassis IOM Fabric Ports Section
-                                                            $FabricPorts = Get-UcsEtherSwitchIntFIo -Ucs $UCSM | Where-Object {$_.ChassisId -eq "$($Iom.ChassisId)"}
+                                                            $FabricPorts = Get-UcsEtherSwitchIntFIo -Ucs $UCSM | Where-Object { $_.ChassisId -eq "$($Iom.ChassisId)" }
                                                             if ($FabricPorts) {   
                                                                 Section -Style Heading4 -Name 'Fabric Ports' {
                                                                     $IomFabricPorts = foreach ($FabricPort in $FabricPorts) {
@@ -439,8 +439,8 @@ function Invoke-AsBuiltReport.Cisco.UcsManager {
                                                             #endregion Chassis IOM Fabric Ports Section
                 
                                                             #region Chassis IOM Backplane Ports Section
-                                                            $BackplanePorts = Get-UcsEtherServerIntFIo -Ucs $UCSM | Where-Object {$_.ChassisId -eq "$($Iom.ChassisId)"} # -and $_.SwitchId -eq "$($Iom.SwitchId)"}
-                                                            $BackplanePorts = $BackplanePorts | Sort-Object {($_.SlotId) -as [int]}, {($_.PortId) -as [int]}
+                                                            $BackplanePorts = Get-UcsEtherServerIntFIo -Ucs $UCSM | Where-Object { $_.ChassisId -eq "$($Iom.ChassisId)" } # -and $_.SwitchId -eq "$($Iom.SwitchId)"}
+                                                            $BackplanePorts = $BackplanePorts | Sort-Object { ($_.SlotId) -as [int] }, { ($_.PortId) -as [int] }
                                                             if ($BackplanePorts) {
                                                                 Section -Style Heading4 -Name 'Backplane Ports' {
                                                                     $IomBackplanePorts = foreach ($BackplanePort in $BackplanePorts) {
@@ -788,8 +788,8 @@ function Invoke-AsBuiltReport.Cisco.UcsManager {
                                         $UcsRackServerDiscoveryPolicy = [PSCustomObject]@{
                                             'Action' = $UcsRackServerDiscPolicy.Action
                                             'Scrub Policy' = Switch ($UcsRackServerDiscPolicy.ScrubPolicyName) {
-                                                '' {'not set'}
-                                                default {$UcsRackServerDiscPolicy.ScrubPolicyName}
+                                                '' { 'not set' }
+                                                default { $UcsRackServerDiscPolicy.ScrubPolicyName }
                                             }
                                         }
                                         $UcsRackServerDiscoveryPolicy | Table -List -Name 'Rack Server Discovery Policy' -ColumnWidths 50, 50
@@ -819,8 +819,8 @@ function Invoke-AsBuiltReport.Cisco.UcsManager {
                                     Section -Style Heading4 -Name 'Global Power Allocation Policy' {
                                         $UcsGlobalPowerPolicy = [PSCustomObject]@{
                                             'Allocation Method' = Switch ($UcsPowerMgmtPolicy.Style) {
-                                                'intelligent-policy-driven' {'Policy Driven Chassis Group Cap'}
-                                                'manual-per-blade' {'Manual Blade Level Cap'}
+                                                'intelligent-policy-driven' { 'Policy Driven Chassis Group Cap' }
+                                                'manual-per-blade' { 'Manual Blade Level Cap' }
                                             }
                                         }
                                         $UcsGlobalPowerPolicy | Table -List -Name 'Global Power Allocation Policy' -ColumnWidths 50, 50
@@ -883,7 +883,7 @@ function Invoke-AsBuiltReport.Cisco.UcsManager {
                 if ($Section.Servers) {
                     Section -Style Heading2 -Name 'Servers' {
                         #region Service Profiles
-                        $UcsServiceProfiles = Get-UcsServiceProfile | Where-Object {$_.Type -eq 'instance'} | Sort-Object Name
+                        $UcsServiceProfiles = Get-UcsServiceProfile | Where-Object { $_.Type -eq 'instance' } | Sort-Object Name
                         if ($UcsServiceProfiles) {
                             #region Service Profiles Section
                             Section -Style Heading3 -Name 'Service Profiles' {
@@ -902,48 +902,48 @@ function Invoke-AsBuiltReport.Cisco.UcsManager {
                                             'Assigned State' = $ServiceProfile.ConfigState
                                             'Status' = $ServiceProfile.OperState
                                             'Boot Policy Name' = Switch ($ServiceProfile.BootPolicyName) {
-                                                '' {'not set'}
-                                                default {$ServiceProfile.BootPolicyName}
+                                                '' { 'not set' }
+                                                default { $ServiceProfile.BootPolicyName }
                                             }
                                             'Host Firmware Policy Name' = Switch ($ServiceProfile.HostFwPolicyName) {
-                                                '' {'not set'}
-                                                default {$ServiceProfile.HostFwPolicyName}
+                                                '' { 'not set' }
+                                                default { $ServiceProfile.HostFwPolicyName }
                                             }
                                             'IPMI Access Profile Policy' = Switch ($ServiceProfile.MgmtAccessPolicyName) {
-                                                '' {'not set'}
-                                                default {$ServiceProfile.MgmtAccessPolicyName}
+                                                '' { 'not set' }
+                                                default { $ServiceProfile.MgmtAccessPolicyName }
                                             }
                                             'Local Disk Policy Name' = Switch ($ServiceProfile.LocalDiskPolicyName) {
-                                                '' {'not set'}
-                                                default {$ServiceProfile.LocalDiskPolicyName}
+                                                '' { 'not set' }
+                                                default { $ServiceProfile.LocalDiskPolicyName }
                                             }
                                             'Maintenance Policy Name' = Switch ($ServiceProfile.MaintPolicyName) {
-                                                '' {'not set'}
-                                                default {$ServiceProfile.MaintPolicyName}
+                                                '' { 'not set' }
+                                                default { $ServiceProfile.MaintPolicyName }
                                             }
                                             'Power Control Policy' = Switch ($ServiceProfile.PowerPolicyName) {
-                                                '' {'not set'}
-                                                default {$ServiceProfile.PowerPolicyName}
+                                                '' { 'not set' }
+                                                default { $ServiceProfile.PowerPolicyName }
                                             }
                                             'Scrub Policy' = Switch ($ServiceProfile.ScrubPolicyName) {
-                                                '' {'not set'}
-                                                default {$ServiceProfile.ScrubPolicyName}
+                                                '' { 'not set' }
+                                                default { $ServiceProfile.ScrubPolicyName }
                                             }
                                             'Stats Policy' = Switch ($ServiceProfile.StatsPolicyName) {
-                                                '' {'not set'}
-                                                default {$ServiceProfile.StatsPolicyName}
+                                                '' { 'not set' }
+                                                default { $ServiceProfile.StatsPolicyName }
                                             }
                                             'KVM Management Policy' = Switch ($ServiceProfile.KvmMgmtPolicyName) {
-                                                '' {'not set'}
-                                                default {$ServiceProfile.KvmMgmtPolicyName}
+                                                '' { 'not set' }
+                                                default { $ServiceProfile.KvmMgmtPolicyName }
                                             }
                                             'Power Sync Policy' = Switch ($ServiceProfile.PowerSyncPolicyName) {
-                                                '' {'not set'}
-                                                default {$ServiceProfile.PowerSyncPolicyName}
+                                                '' { 'not set' }
+                                                default { $ServiceProfile.PowerSyncPolicyName }
                                             }
                                             'Graphics Card Policy' = Switch ($ServiceProfile.GraphicsCardPolicyName) {
-                                                '' {'not set'}
-                                                default {$ServiceProfile.GraphicsCardPolicyName}
+                                                '' { 'not set' }
+                                                default { $ServiceProfile.GraphicsCardPolicyName }
                                             }
                                         }
                                         $ServiceProfiles | Table -List -Name "$($ServiceProfile.Name) Service Profile" -ColumnWidths 50, 50
@@ -955,12 +955,12 @@ function Invoke-AsBuiltReport.Cisco.UcsManager {
                         #endregion Service Profiles
 
                         #region Service Profile Templates
-                        $UcsServiceProfileTemplates = Get-UcsServiceProfile | Where-Object {$_.Type -ne 'instance'} | Sort-Object Name
+                        $UcsServiceProfileTemplates = Get-UcsServiceProfile | Where-Object { $_.Type -ne 'instance' } | Sort-Object Name
                         if ($UcsServiceProfileTemplates) {
                             #region Service Profile Templates Section
                             Section -Style Heading3 -Name 'Service Profile Templates' {
                                 foreach ($ServiceProfileTemplate in $UcsServiceProfileTemplates) {
-                                    Section -Style Heading4 -Name "$($ServiceProfile.Name)" {
+                                    Section -Style Heading4 -Name "$($ServiceProfileTemplate.Name)" {
                                         $ServiceProfileTemplates = [PSCustomObject]@{
                                             'Name' = $ServiceProfileTemplate.Name
                                             'User Label' = $ServiceProfileTemplate.UsrLbl
@@ -1009,13 +1009,13 @@ function Invoke-AsBuiltReport.Cisco.UcsManager {
                                                 'Owner' = $EthAdapterPolicy.PolicyOwner
                                             }
                                         }
-                                        $EthAdapterPolicies | Sort-Object 'Name','Distinguished Name' | Table -Name 'Ethernet Adapter Policies'
+                                        $EthAdapterPolicies | Sort-Object 'Name', 'Distinguished Name' | Table -Name 'Ethernet Adapter Policies'
                                     }
                                 }
                                 #endregion Ethernet Adapter Policy
 
                                 #region iSCSI Adapter Policy
-                                $UcsiScsiAdapterPolicy = Get-UcsiScsiAdapterPolicy -Ucs $UCSM
+                                $UcsiScsiAdapterPolicy = Get-UcsIScsiAdapterPolicy -Ucs $UCSM
                                 if ($UcsiScsiAdapterPolicy) {
                                     Section -Style Heading4 -Name 'iSCSI Adapter Policies' {
                                         $iScsiAdapterPolicies = foreach ($iScsiAdapterPolicy in $UcsiScsiAdapterPolicy ) {
@@ -1026,7 +1026,7 @@ function Invoke-AsBuiltReport.Cisco.UcsManager {
                                                 'Owner' = $iScsiAdapterPolicy.PolicyOwner
                                             }
                                         }
-                                        $iScsiAdapterPolicies | Sort-Object 'Name','Distinguished Name' | Table -Name 'iSCSI Adapter Policies'
+                                        $iScsiAdapterPolicies | Sort-Object 'Name', 'Distinguished Name' | Table -Name 'iSCSI Adapter Policies'
                                     }
                                 }
                                 #endregion iSCSI Adapter Policy
@@ -1043,7 +1043,7 @@ function Invoke-AsBuiltReport.Cisco.UcsManager {
                                                 'Owner' = $FcAdapterPolicy.PolicyOwner
                                             }
                                         }
-                                        $FcAdapterPolicies | Sort-Object 'Name','Distinguished Name' | Table -Name 'Fibre Channel Adapter Policies'
+                                        $FcAdapterPolicies | Sort-Object 'Name', 'Distinguished Name' | Table -Name 'Fibre Channel Adapter Policies'
                                     }
                                 }
                                 #endregion Fibre Channel Adapter Policy
@@ -1062,7 +1062,7 @@ function Invoke-AsBuiltReport.Cisco.UcsManager {
                                             'Reboot on BIOS Settings Change' = $BiosPolicy.RebootOnUpdate
                                         }
                                     }
-                                    $UcsBiosPolicies | Sort-Object 'Name','Distinguished Name' | Table -Name 'BIOS Policies'
+                                    $UcsBiosPolicies | Sort-Object 'Name', 'Distinguished Name' | Table -Name 'BIOS Policies'
                                 }
                             }
 
@@ -1117,7 +1117,7 @@ function Invoke-AsBuiltReport.Cisco.UcsManager {
                                             'Boot Mode' = $BootPolicy.BootMode
                                         }
                                     }
-                                    $UcsBootPolicies | Sort-Object 'Name','Distinguished Name' | Table -Name 'Boot Policies' 
+                                    $UcsBootPolicies | Sort-Object 'Name', 'Distinguished Name' | Table -Name 'Boot Policies' 
                                 }
                             }
                             #endregion Boot Policies
@@ -1134,7 +1134,7 @@ function Invoke-AsBuiltReport.Cisco.UcsManager {
                                             'Owner' = $DiagRunPolicy.PolicyOwner
                                         }
                                     }
-                                    $UcsDiagRunPolicies | Sort-Object 'Name','Distinguished Name' | Table -Name 'Diagnostic Policies'
+                                    $UcsDiagRunPolicies | Sort-Object 'Name', 'Distinguished Name' | Table -Name 'Diagnostic Policies'
                                 }
                             }
                             #endregion Diagnostic Policies
@@ -1152,7 +1152,7 @@ function Invoke-AsBuiltReport.Cisco.UcsManager {
                                             'Graphics Card Mode' = $ComputeGraphicsCardPolicy.GraphicsCardMode
                                         }
                                     }
-                                    $UcsGraphicsCardPolicies | Sort-Object 'Name','Distinguished Name' | Table -Name 'Graphics Card Policies'
+                                    $UcsGraphicsCardPolicies | Sort-Object 'Name', 'Distinguished Name' | Table -Name 'Graphics Card Policies'
                                 }
                             }
                             #endregion Graphics Card Policies
@@ -1170,7 +1170,7 @@ function Invoke-AsBuiltReport.Cisco.UcsManager {
                             #>
 
                             #region KVM Management Policies
-                            $UcsComputeKvmMgmtPolicy = Get-UcsComputeKvmMgmtPolicy -Ucs $UCSM | Where-Object {$_.Name -ne 'policy'}
+                            $UcsComputeKvmMgmtPolicy = Get-UcsComputeKvmMgmtPolicy -Ucs $UCSM | Where-Object { $_.Name -ne 'policy' }
                             if ($UcsComputeKvmMgmtPolicy) {
                                 Section -Style Heading3 -Name 'KVM Management Policies' {
                                     $ComputeKvmMgmtPolicies = foreach ($ComputeKvmMgmtPolicy in $UcsComputeKvmMgmtPolicy) {
@@ -1182,7 +1182,7 @@ function Invoke-AsBuiltReport.Cisco.UcsManager {
                                             'vMedia Encryption' = $ComputeKvmMgmtPolicy.VmediaEncryption
                                         }
                                     }
-                                    $ComputeKvmMgmtPolicies | Sort-Object 'Name','Distinguished Name' | Table -Name 'KVM Management Policies'
+                                    $ComputeKvmMgmtPolicies | Sort-Object 'Name', 'Distinguished Name' | Table -Name 'KVM Management Policies'
                                 }
                             }
                             #endregion KVM Management Policies
@@ -1204,7 +1204,7 @@ function Invoke-AsBuiltReport.Cisco.UcsManager {
                                             'FlexFlash Removable State' = $LocalDiskConfigPolicy.FlexFlashRemovableState
                                         }
                                     }
-                                    $LocalDiskConfigPolicies | Sort-Object 'Name','Distinguished Name' | Table -Name 'Local Disk Config Policies' 
+                                    $LocalDiskConfigPolicies | Sort-Object 'Name', 'Distinguished Name' | Table -Name 'Local Disk Config Policies' 
                                 }
                             }
                             #endregion Local Disk Config Policies
@@ -1224,7 +1224,7 @@ function Invoke-AsBuiltReport.Cisco.UcsManager {
                                             'Reboot Policy' = $MaintenancePolicy.UptimeDisr
                                         }
                                     }
-                                    $MaintenancePolicies | Sort-Object 'Name','Distinguished Name' | Table -Name 'Maintenance Policies' 
+                                    $MaintenancePolicies | Sort-Object 'Name', 'Distinguished Name' | Table -Name 'Maintenance Policies' 
                                 }
                             }
                             #endregion Maintenance Policies
@@ -1249,7 +1249,7 @@ function Invoke-AsBuiltReport.Cisco.UcsManager {
                                             'Blacklisting' = $ComputeMemoryConfigPolicy.Blacklisting
                                         }
                                     }
-                                    $ComputeMemoryConfigPolicies | Sort-Object 'Name','Distinguished Name' | Table -Name 'Memory Policy'
+                                    $ComputeMemoryConfigPolicies | Sort-Object 'Name', 'Distinguished Name' | Table -Name 'Memory Policy'
                                 }
                             }
                             #endregion Memory Policy
@@ -1267,7 +1267,7 @@ function Invoke-AsBuiltReport.Cisco.UcsManager {
                                             'Fan Speed Policy' = $PowerPolicy.FanSpeed
                                         }
                                     }
-                                    $PowerPolicies | Sort-Object 'Name','Distinguished Name' | Table -Name 'Power Control Policies'
+                                    $PowerPolicies | Sort-Object 'Name', 'Distinguished Name' | Table -Name 'Power Control Policies'
                                 }
                             }
                             #endregion Power Control Policies
@@ -1285,13 +1285,13 @@ function Invoke-AsBuiltReport.Cisco.UcsManager {
                                             'Sync Option' = $ComputePowerSyncPolicy.SyncOption
                                         }
                                     }
-                                    $ComputePowerSyncPolicies | Sort-Object 'Name','Distinguished Name' | Table -Name 'Power Sync Policies'
+                                    $ComputePowerSyncPolicies | Sort-Object 'Name', 'Distinguished Name' | Table -Name 'Power Sync Policies'
                                 }
                             }
                             #endregion Power Sync Policies
 
                             #region Scrub Policies
-                            $UcsScrubPolicy = Get-UcsScrubPolicy -Ucs $UCSM | Where-Object {$_.Name -ne 'policy'}
+                            $UcsScrubPolicy = Get-UcsScrubPolicy -Ucs $UCSM | Where-Object { $_.Name -ne 'policy' }
                             if ($UcsScrubPolicy) {
                                 Section -Style Heading3 -Name 'Scrub Policies' {
                                     $UcsScrubPolicies = foreach ($ScrubPolicy in $UcsScrubPolicy) {
@@ -1305,7 +1305,7 @@ function Invoke-AsBuiltReport.Cisco.UcsManager {
                                             'FlexFlash Scrub' = $ScrubPolicy.FlexFlashScrub
                                         }
                                     }
-                                    $UcsScrubPolicies | Sort-Object 'Name','Distinguished Name' | Table -Name 'Scrub Policies' 
+                                    $UcsScrubPolicies | Sort-Object 'Name', 'Distinguished Name' | Table -Name 'Scrub Policies' 
                                 }
                             }
                             #endregion Scrub Policies
@@ -1334,7 +1334,7 @@ function Invoke-AsBuiltReport.Cisco.UcsManager {
                                             'Owner' = $ServerPoolQualification.PolicyOwner
                                         }
                                     }
-                                    $ServerPoolQualifications | Sort-Object 'Name','Distinguished Name' | Table -Name 'Server Pool Policy Qualifications'
+                                    $ServerPoolQualifications | Sort-Object 'Name', 'Distinguished Name' | Table -Name 'Server Pool Policy Qualifications'
                                 }
                             }
                             #endregion Server Pool Policy Qualifications
@@ -1363,7 +1363,7 @@ function Invoke-AsBuiltReport.Cisco.UcsManager {
                         #region Server Pools Section
                         Section -Style Heading2 -Name 'Pools' {
                             #region UUID Pools
-                            $UcsUuidSuffixPool = Get-UcsUuidSuffixPool -Ucs $UCSM | Where-Object {$_.Size -gt 0}
+                            $UcsUuidSuffixPool = Get-UcsUuidSuffixPool -Ucs $UCSM | Where-Object { $_.Size -gt 0 }
                             if ($UcsUuidSuffixPool) {
                                 Section -Style Heading3 -Name 'UUID Suffix Pools' {
                                     $UuidSuffixPool = foreach ($UuidPool in $UcsUuidSuffixPool) {
@@ -1375,7 +1375,7 @@ function Invoke-AsBuiltReport.Cisco.UcsManager {
                                             'Size' = $UuidPool.Size
                                             'Assigned' = $UuidPool.Assigned
                                             'Assignment Order' = $UuidPool.AssignmentOrder
-                                            'UUID Suffix Blocks' = ($UcsUuidSuffixBlock | Sort-Object From | foreach {"$($_.From) - $($_.To)"}) -join [Environment]::NewLine
+                                            'UUID Suffix Blocks' = ($UcsUuidSuffixBlock | Sort-Object From | ForEach-Object { "$($_.From) - $($_.To)" }) -join [Environment]::NewLine
                                         }
                                     }
                                     $UuidSuffixPool | Table -Name 'UUID Suffix Pools' 
@@ -1384,7 +1384,7 @@ function Invoke-AsBuiltReport.Cisco.UcsManager {
                             #endregion UUID Pools
 
                             #region UUID Suffixes
-                            $UcsUuidPoolAddr = Get-UcsUuidPoolAddr -Ucs $UCSM | Where-Object {$_.Assigned -eq 'yes'}
+                            $UcsUuidPoolAddr = Get-UcsUuidpoolAddr -Ucs $UCSM | Where-Object { $_.Assigned -eq 'yes' }
                             if ($UcsUuidPoolAddr) {
                                 Section -Style Heading3 -Name 'UUID Suffixes' {
                                     $UuidPoolAddr = foreach ($UuidAddr in $UcsUuidPoolAddr) {
@@ -1401,7 +1401,7 @@ function Invoke-AsBuiltReport.Cisco.UcsManager {
                             #endregion UUID Suffixes
 
                             #region Server Pools
-                            $UcsServerPool = Get-UcsServerPool -Ucs $UCSM | Where-Object {$_.Size -gt 0}
+                            $UcsServerPool = Get-UcsServerPool -Ucs $UCSM | Where-Object { $_.Size -gt 0 }
                             if ($UcsServerPool) {
                                 Section -Style Heading3 -Name 'Server Pools' {
                                     $ServerPool = foreach ($Server in $UcsServerPool) {
@@ -1465,8 +1465,8 @@ function Invoke-AsBuiltReport.Cisco.UcsManager {
                                             'Status' = $PortChannel.OperState
                                         }
                                     }
-                                    $UplinkPortChannel  | Sort-Object 'Fabric', 'ID' | Table -Name 'Port Channels and Uplinks'
-                                    Blankline
+                                    $UplinkPortChannel | Sort-Object 'Fabric', 'ID' | Table -Name 'Port Channels and Uplinks'
+                                    BlankLine
                                     foreach ($PortChannel in $UcsUplinkPortChannel) {
                                         $UcsUplinkPortChannelMember = Get-UcsUplinkPortChannelMember -Ucs $UCSM -UplinkPortChannel $PortChannel
                                         $UplinkPortChannelMember = foreach ($PortChannelMember in $UcsUplinkPortChannelMember) {
@@ -1494,7 +1494,7 @@ function Invoke-AsBuiltReport.Cisco.UcsManager {
                             #endregion Port Channels and Uplinks Section
 
                             #region VLANs
-                            $UcsVlan = Get-UcsVlan | Where-Object {$_.IfRole -eq 'Network'}
+                            $UcsVlan = Get-UcsVlan | Where-Object { $_.IfRole -eq 'Network' }
                             if ($UcsVlan) {
                                 Section -Style Heading4 -Name 'VLANs' {
                                     $Vlans = foreach ($Vlan in $UcsVlan) {
@@ -1508,8 +1508,8 @@ function Invoke-AsBuiltReport.Cisco.UcsManager {
                                             'Locale' = $Vlan.Locale
                                             'Sharing Type' = $Vlan.Sharing
                                             'Multicast Policy Name' = Switch ($Vlan.McastPolicyName) {
-                                                '' {'not set'}
-                                                default {$Vlan.McastPolicyName}
+                                                '' { 'not set' }
+                                                default { $Vlan.McastPolicyName }
                                             }
                                             'Multicast Policy Instance' = $Vlan.OperMcastPolicyName
                                         }
@@ -1520,7 +1520,7 @@ function Invoke-AsBuiltReport.Cisco.UcsManager {
                             #endregion VLANs
 
                             #region Server Links
-                            $UcsServerLinks = Get-UcsFabricPort -Ucs $UCSM | Where-Object {$_.IfRole -eq 'server'}
+                            $UcsServerLinks = Get-UcsFabricPort -Ucs $UCSM | Where-Object { $_.IfRole -eq 'server' }
                             if ($UcsServerLinks) {
                                 Section -Style Heading4 -Name 'Server Links' {
                                     $ServerLinks = foreach ($ServerLink in $UcsServerLinks) {
@@ -1558,8 +1558,8 @@ function Invoke-AsBuiltReport.Cisco.UcsManager {
                                             'Enabled' = $QosClass.AdminState
                                             'CoS' = $QosClass.Cos
                                             'Packet Drop' = Switch ($QosClass.Drop) {
-                                                'no-drop' {'disabled'}
-                                                'drop' {'enabled'}
+                                                'no-drop' { 'disabled' }
+                                                'drop' { 'enabled' }
                                             }
                                             'Weight' = $QosClass.Weight
                                             'Weight (%)' = $QosClass.BwPercent
@@ -1780,9 +1780,9 @@ function Invoke-AsBuiltReport.Cisco.UcsManager {
                                             'Description' = $Vnic.Descr
                                             'Owner' = $Vnic.PolicyOwner
                                             'Fabric' = Switch ($Vnic.SwitchId) {
-                                                'A-B' {'enable failover'}
-                                                'B-A' {'enable failover'}
-                                                default {$Vnic.SwitchId}
+                                                'A-B' { 'enable failover' }
+                                                'B-A' { 'enable failover' }
+                                                default { $Vnic.SwitchId }
                                             }
                                             'Redundancy Type' = $Vnic.RedundancyPairType
                                             'Target' = $Vnic.Target -join ', '
@@ -1791,12 +1791,12 @@ function Invoke-AsBuiltReport.Cisco.UcsManager {
                                             'MTU' = $Vnic.Mtu
                                             'MAC Pool' = $Vnic.IdentPoolName
                                             'QoS Policy' = Switch ($Vnic.QosPolicyName) {
-                                                '' {'not set'}
-                                                default {$Vnic.QosPolicyName}
+                                                '' { 'not set' }
+                                                default { $Vnic.QosPolicyName }
                                             }
                                             'Network Control Policy' = Switch ($Vnic.NwCtrlPolicyName) {
-                                                '' {'not set'}
-                                                default {$Vnic.NwCtrlPolicyName}
+                                                '' { 'not set' }
+                                                default { $Vnic.NwCtrlPolicyName }
                                             }
                                             'Pin Group' = $Vnic.PinToGroupName
                                             'Stats Threshold Policy' = $Vnic.StatsPolicyName
@@ -1813,7 +1813,7 @@ function Invoke-AsBuiltReport.Cisco.UcsManager {
                         #region Pools Section
                         Section -Style Heading3 -Name 'Pools' {
                             #region IP Pools Section
-                            $UcsIpPool = Get-UcsIpPool -Ucs $UCSM | Where-Object {$_.Size -gt 0}
+                            $UcsIpPool = Get-UcsIpPool -Ucs $UCSM | Where-Object { $_.Size -gt 0 }
                             if ($UcsIpPool) {
                                 Section -Style Heading4 -Name 'IP Pools' {
                                     $IpPools = foreach ($IpPool in $UcsIpPool) {
@@ -1826,7 +1826,7 @@ function Invoke-AsBuiltReport.Cisco.UcsManager {
                                             'Size' = $IpPool.Size
                                             'Assigned' = $IpPool.Assigned
                                             'Assignment Order' = $IpPool.AssignmentOrder
-                                            'IP Blocks' = ($UcsIpPoolBlock | Sort-Object From | foreach {"$($_.From) - $($_.To)"}) -join [Environment]::NewLine
+                                            'IP Blocks' = ($UcsIpPoolBlock | Sort-Object From | ForEach-Object { "$($_.From) - $($_.To)" }) -join [Environment]::NewLine
                                         }
                                     }
                                     $IpPools | Sort-Object 'Name' | Table -Name 'IP Pools' 
@@ -1852,7 +1852,7 @@ function Invoke-AsBuiltReport.Cisco.UcsManager {
                             #endregion IP Pool Addresses
                         
                             #region MAC Pools Section
-                            $UcsMacPool = Get-UcsMacPool -Ucs $UCSM | Where-Object {$_.Size -gt 0}
+                            $UcsMacPool = Get-UcsMacPool -Ucs $UCSM | Where-Object { $_.Size -gt 0 }
                             if ($UcsMacPool) {
                                 Section -Style Heading4 -Name 'MAC Pools' {
                                     $MacPools = foreach ($MacPool in $UcsMacPool) {
@@ -1864,7 +1864,7 @@ function Invoke-AsBuiltReport.Cisco.UcsManager {
                                             'Size' = $MacPool.Size
                                             'Assigned' = $MacPool.Assigned
                                             'Assignment Order' = $MacPool.AssignmentOrder
-                                            'MAC Blocks' = ($UcsMacPoolBlock | Sort-Object From | foreach {"$($_.From) - $($_.To)"}) -join [Environment]::NewLine
+                                            'MAC Blocks' = ($UcsMacPoolBlock | Sort-Object From | ForEach-Object { "$($_.From) - $($_.To)" }) -join [Environment]::NewLine
                                         }
                                     }
                                     $MacPools | Sort-Object 'Name' | Table -Name 'MAC Pools'
@@ -1873,7 +1873,7 @@ function Invoke-AsBuiltReport.Cisco.UcsManager {
                             #endregion MAC Pools Section
 
                             #region MAC Pool Addresses
-                            $UcsMacPoolAddr = Get-UcsMacPoolAddr -Ucs $UCSM | Where-Object {$_.Assigned -eq 'yes'}
+                            $UcsMacPoolAddr = Get-UcsMacPoolAddr -Ucs $UCSM | Where-Object { $_.Assigned -eq 'yes' }
                             if ($UcsMacPoolAddr) {
                                 Section -Style Heading4 -Name 'MAC Pool Addresses' {
                                     $MacPoolAddr = foreach ($MacAddr in $UcsMacPoolAddr) {
@@ -1966,7 +1966,7 @@ function Invoke-AsBuiltReport.Cisco.UcsManager {
                             #endregion Uplink FC Interfaces
 
                             #region Uplink FCoE Interfaces
-                            $UcsFabricPort = Get-UcsFabricPort -Ucs $UCSM | Where-Object {$_.IfRole -eq 'fcoe-uplink'}
+                            $UcsFabricPort = Get-UcsFabricPort -Ucs $UCSM | Where-Object { $_.IfRole -eq 'fcoe-uplink' }
                             if ($UcsFabricPort) {
                                 Section -Style Heading4 -Name 'Uplink FCoE Interfaces' {
                                 }
@@ -2045,7 +2045,7 @@ function Invoke-AsBuiltReport.Cisco.UcsManager {
                                             'Owner' = $FcAdapterPolicy.PolicyOwner
                                         }
                                     }
-                                    $FcAdapterPolicies | Sort-Object 'Name','Distinguished Name' | Table -Name 'Fibre Channel Adapter Policies'
+                                    $FcAdapterPolicies | Sort-Object 'Name', 'Distinguished Name' | Table -Name 'Fibre Channel Adapter Policies'
                                 }
                             }
                             #endregion Fibre Channel Adapter Policy
@@ -2122,7 +2122,7 @@ function Invoke-AsBuiltReport.Cisco.UcsManager {
                         #region SAN Pools
                         Section -Style Heading3 -Name 'Pools' {
                             #region IQN Pools
-                            $UcsIqnPoolPool = Get-UcsIqnPoolPool -Ucs $UCSM | Where-Object {$_.Size -gt 0}
+                            $UcsIqnPoolPool = Get-UcsIqnPoolPool -Ucs $UCSM | Where-Object { $_.Size -gt 0 }
                             if ($UcsIqnPoolPool) {
                                 Section -Style Heading4 -Name 'IQN Pools' {
                                     $IqnPools = foreach ($IqnPool in $UcsIqnPoolPool) {
@@ -2135,7 +2135,7 @@ function Invoke-AsBuiltReport.Cisco.UcsManager {
                                             'Size' = $IqnPool.Size
                                             'Assigned' = $IqnPool.Assigned
                                             'Assignment Order' = $IqnPool.AssignmentOrder
-                                            'IQN Blocks' = ($UcsIqnPoolBlock | Sort-Object Suffix | foreach {"$($_.Suffix):$($_.From) - $($_.Suffix):$($_.To)"}) -join [Environment]::NewLine
+                                            'IQN Blocks' = ($UcsIqnPoolBlock | Sort-Object Suffix | ForEach-Object { "$($_.Suffix):$($_.From) - $($_.Suffix):$($_.To)" }) -join [Environment]::NewLine
                                         }
                                     }
                                     $IqnPools | Sort-Object 'Name', 'Distinguished Name' | Table -Name 'IQN Pools'
@@ -2144,7 +2144,7 @@ function Invoke-AsBuiltReport.Cisco.UcsManager {
                             #end region IQN Pools
 
                             #region WWNN Pools
-                            $UcsWwnnPool = Get-UcsWwnPool -Ucs $UCSM | Where-Object {$_.Purpose -eq 'node-wwn-assignment' -and $_.Size -gt 0}
+                            $UcsWwnnPool = Get-UcsWwnPool -Ucs $UCSM | Where-Object { $_.Purpose -eq 'node-wwn-assignment' -and $_.Size -gt 0 }
                             if ($UcsWwnnPool) {
                                 Section -Style Heading4 -Name 'WWNN Pools' {
                                     $WwnnPools = foreach ($WwnnPool in $UcsWwnnPool) {
@@ -2156,7 +2156,7 @@ function Invoke-AsBuiltReport.Cisco.UcsManager {
                                             'Size' = $WwnnPool.Size
                                             'Assigned' = $WwnnPool.Assigned
                                             'Assignment Order' = $WwnnPool.AssignmentOrder
-                                            'WWN Initiator Blocks' = ($UcsWwnnMemberBlock | Sort-Object From | foreach {"$($_.From) - $($_.To)"}) -join [Environment]::NewLine
+                                            'WWN Initiator Blocks' = ($UcsWwnnMemberBlock | Sort-Object From | ForEach-Object { "$($_.From) - $($_.To)" }) -join [Environment]::NewLine
                                         }
                                     }
                                     $WwnnPools | Sort-Object 'Name', 'Distinguished Name' | Table -Name 'WWNN Pools'
@@ -2165,7 +2165,7 @@ function Invoke-AsBuiltReport.Cisco.UcsManager {
                             #endregion WWNN Pools
 
                             #region WWPN Pools
-                            $UcsWwpnPool = Get-UcsWwnPool -Ucs $UCSM | Where-Object {$_.Purpose -eq 'port-wwn-assignment' -and $_.Szie -gt 0}
+                            $UcsWwpnPool = Get-UcsWwnPool -Ucs $UCSM | Where-Object { $_.Purpose -eq 'port-wwn-assignment' -and $_.Szie -gt 0 }
                             if ($UcsWwpnPool) {
                                 Section -Style Heading4 -Name 'WWPN Pools' {
                                     $WwpnPools = foreach ($WwpnPool in $UcsWwpnPool) {
@@ -2177,7 +2177,7 @@ function Invoke-AsBuiltReport.Cisco.UcsManager {
                                             'Size' = $WwpnPool.Size
                                             'Assigned' = $WwpnPool.Assigned
                                             'Assignment Order' = $WwpnPool.AssignmentOrder
-                                            'WWN Initiator Blocks' = ($UcsWwpnMemberBlock | Sort-Object From | foreach {"$($_.From) - $($_.To)"}) -join [Environment]::NewLine
+                                            'WWN Initiator Blocks' = ($UcsWwpnMemberBlock | Sort-Object From | ForEach-Object { "$($_.From) - $($_.To)" }) -join [Environment]::NewLine
                                         }
                                     }
                                     $WwpnPools | Sort-Object 'Name', 'Distinguished Name' | Table -Name 'WWPN Pools'
@@ -2186,7 +2186,7 @@ function Invoke-AsBuiltReport.Cisco.UcsManager {
                             #endregion WWPN Pools
 
                             #region WWxN Pools
-                            $UcsWwxnPool = Get-UcsWwnPool -Ucs $UCSM | Where-Object {$_.Purpose -eq 'node-and-port-wwn-assignment' -and $_.Size -gt 0}
+                            $UcsWwxnPool = Get-UcsWwnPool -Ucs $UCSM | Where-Object { $_.Purpose -eq 'node-and-port-wwn-assignment' -and $_.Size -gt 0 }
                             if ($UcsWwxnPool) {
                                 Section -Style Heading4 -Name 'WWxN Pools' {
                                     $WwxnPools = foreach ($WwxnPool in $UcsWwxnPool) {
@@ -2198,7 +2198,7 @@ function Invoke-AsBuiltReport.Cisco.UcsManager {
                                             'Size' = $WwxnPool.Size
                                             'Assigned' = $WwxnPool.Assigned
                                             'Assignment Order' = $WwxnPool.AssignmentOrder
-                                            'WWN Blocks' = ($UcsWwxnMemberBlock | Sort-Object From | foreach {"$($_.From) - $($_.To)"}) -join [Environment]::NewLine
+                                            'WWN Blocks' = ($UcsWwxnMemberBlock | Sort-Object From | ForEach-Object { "$($_.From) - $($_.To)" }) -join [Environment]::NewLine
                                         }
                                     }
                                     $WwxnPools | Sort-Object 'Name', 'Distinguished Name' | Table -Name 'WWxN Pools'
@@ -2701,10 +2701,10 @@ function Invoke-AsBuiltReport.Cisco.UcsManager {
                             #endregion Communication Services Section
 
                             #region DNS Management
-                            $UcsDnsServer = Get-UcsDnsServer | Where-Object {($_.Dn).StartsWith('org-root')}
+                            $UcsDnsServer = Get-UcsDnsServer | Where-Object { ($_.Dn).StartsWith('org-root') }
                             if ($UcsDnsServer) {
                                 Section -Style Heading4 -Name 'DNS Management' {
-                                    $UcsDnsServer | Select-Object @{L = 'DNS Server'; E = {$_.Name}} | Table -Name 'DNS Management'
+                                    $UcsDnsServer | Select-Object @{L = 'DNS Server'; E = { $_.Name } } | Table -Name 'DNS Management'
                                 } 
                             }
                             #endregion DNS Management
@@ -2738,12 +2738,12 @@ function Invoke-AsBuiltReport.Cisco.UcsManager {
                                         'Registration State' = $UcsCentral.RegistrationState
                                         'Cleanup Mode' = $UcsCentral.Cleanupmode
                                         'Suspend State' = Switch ($UcsCentral.SuspendState) {
-                                            'off' {'disabled'}
-                                            'on' {'enabled'}
+                                            'off' { 'disabled' }
+                                            'on' { 'enabled' }
                                         }
                                         'Acknowledge State' = Switch ($UcsCentral.AckState) {
-                                            'no-ack' {'disabled'}
-                                            'ack' {'enabled'}
+                                            'no-ack' { 'disabled' }
+                                            'ack' { 'enabled' }
                                         }
                                     }
                                     $UcsCentralConfig | Table -List -Name 'UCS Central' -ColumnWidths 50, 50
@@ -2759,13 +2759,13 @@ function Invoke-AsBuiltReport.Cisco.UcsManager {
                         #endregion Stats Management
 
                         #region Time Zone Management Section
-                        $UcsTimeZone = Get-UcsTimeZone -Ucs $UCSM | Select-Object -First 1
+                        $UcsTimeZone = Get-UcsTimezone -Ucs $UCSM | Select-Object -First 1
                         if ($UcsTimeZone) {
                             Section -Style Heading3 -Name 'Time Zone Management' {
                                 $TimeZone = [PSCustomObject] @{
                                     'Time Zone' = Switch ($UcsTimeZone.TimeZone) {
-                                        '' {'not set'}
-                                        default {$UcsTimeZone.TimeZone}
+                                        '' { 'not set' }
+                                        default { $UcsTimeZone.TimeZone }
                                     }
                                 }
                                 $TimeZone | Table -List -Name 'Time Zone' -ColumnWidths 50, 50
